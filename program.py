@@ -1,64 +1,51 @@
-import requests
-import json
-
-class Product:
-    def __init__(self, name, price, currency, supplier):
-        self.name = name
-        self.price = price
-        self.currency = currency
-        self.supplier = supplier
-
-    def get_price_in_usd(self):
-        response = requests.get(f"https://api.exchangerate-api.com/v4/latest/{self.currency}")
-        data = response.json()
-        return self.price / data['rates']['USD']
-
-class ProductCatalog:
-    def __init__(self):
-        self.products = []
-
-    def add_product(self, product):
-        self.products.append(product)
-
-    def delete_product(self, product_name):
-        for product in self.products:
-            if product.name == product_name:
-                self.products.remove(product)
-                print(f"{product_name} deleted from the catalog.")
-                return
-        print(f"{product_name} is not in the catalog.")
-
-    def list_products(self):
-        for product in self.products:
-            print(f"{product.name}, {product.price} {product.currency}, supplied by {product.supplier}")
-
-    def get_product_by_name(self, product_name):
-        for product in self.products:
-            if product.name == product_name:
-                return product
-        print(f"{product_name} is not in the catalog.")
-
-    def save_catalog_to_file(self, file_name):
-        with open(file_name, 'w') as f:
-            for product in self.products:
-                f.write(f"{product.name},{product.price},{product.currency},{product.supplier}\n")
-
-    def load_catalog_from_file(self, file_name):
-        self.products = []
-        with open(file_name, 'r') as f:
-            for line in f:
-                name, price, currency, supplier = line.strip().split(',')
-                self.products.append(Product(name, float(price), currency, supplier))
-
-    def get_catalog_value_in_usd(self):
-        total_value = 0
-        for product in self.products:
-            total_value += product.get_price_in_usd()
-        return total_value
-
-
-if __name__ == '__main__':
-    catalog = ProductCatalog()
-    catalog.load_catalog_from_file('products.txt')
-    catalog.list_products()
-    print(f"\nTotal catalog value in USD: {catalog.get_catalog_value_in_usd():.2f}")
+Sub StokDashboard()
+    Dim StokTbl As ListObject
+    Dim StokData As Range
+    Dim StokChart As Chart
+    Dim StokChartRange As Range
+    Dim StokChartTitle As String
+    
+    ' Stok tablosu oluşturma
+    Set StokData = Sheets("Sheet1").Range("A1:C101")
+    Set StokTbl = Sheets("Sheet1").ListObjects.Add(xlSrcRange, StokData, , xlYes)
+    StokTbl.TableStyle = "TableStyleMedium2"
+    StokTbl.Range.Columns(1).ColumnWidth = 14
+    StokTbl.Range.Columns(2).ColumnWidth = 30
+    
+    ' Stok grafiği oluşturma
+    Set StokChart = Sheets("Sheet1").Shapes.AddChart2(251, xlColumnClustered).Chart
+    StokChart.Parent.Name = "Stok Grafik"
+    StokChart.SetSourceData StokTbl.Range.Columns(3)
+    StokChart.HasLegend = False
+    StokChartTitle = "Stok Durumu"
+    StokChart.ChartTitle.Text = StokChartTitle
+    StokChart.Axes(xlCategory).TickLabels.Font.Size = 10
+    Set StokChartRange = StokTbl.Range.Columns(1).Resize(StokTbl.ListRows.Count + 1, 1)
+    StokChart.Axes(xlCategory).CategoryNames = StokChartRange
+    StokChart.Axes(xlValue).TickLabels.NumberFormat = "#,##0.00"
+    StokChart.ChartArea.Format.Fill.ForeColor.RGB = RGB(255, 255, 255)
+    StokChart.ChartArea.Format.Line.Visible = False
+    StokChart.PlotArea.Format.Fill.ForeColor.RGB = RGB(255, 255, 255)
+    StokChart.PlotArea.Format.Line.Visible = False
+    StokChart.ChartArea.Border.LineStyle = xlNone
+    StokChart.PlotArea.Border.LineStyle = xlNone
+    
+    ' Stok takip tablosu oluşturma
+    Dim StokTakipTbl As ListObject
+    Dim StokTakipData As Range
+    Dim StokTakipChart As Chart
+    Dim StokTakipChartRange As Range
+    Dim StokTakipChartTitle As String
+    
+    Set StokTakipData = Sheets("Sheet1").Range("E1:H101")
+    Set StokTakipTbl = Sheets("Sheet1").ListObjects.Add(xlSrcRange, StokTakipData, , xlYes)
+    StokTakipTbl.TableStyle = "TableStyleMedium2"
+    StokTakipTbl.Range.Columns(1).ColumnWidth = 14
+    StokTakipTbl.Range.Columns(2).ColumnWidth = 30
+    StokTakipTbl.Range.Columns(3).ColumnWidth = 14
+    StokTakipTbl.Range.Columns(4).ColumnWidth = 14
+    
+    ' Stok takip grafiği oluşturma
+    Set StokTakipChart = Sheets("Sheet1").Shapes.AddChart2(251, xlLineMarkers).Chart
+    StokTakipChart.Parent.Name = "Stok Takip Grafik"
+    StokTakipChart.SetSourceData StokTak
