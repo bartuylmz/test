@@ -1,51 +1,165 @@
-Sub StokDashboard()
-    Dim StokTbl As ListObject
-    Dim StokData As Range
-    Dim StokChart As Chart
-    Dim StokChartRange As Range
-    Dim StokChartTitle As String
+Sub stockDashboard()
     
-    ' Stok tablosu oluşturma
-    Set StokData = Sheets("Sheet1").Range("A1:C101")
-    Set StokTbl = Sheets("Sheet1").ListObjects.Add(xlSrcRange, StokData, , xlYes)
-    StokTbl.TableStyle = "TableStyleMedium2"
-    StokTbl.Range.Columns(1).ColumnWidth = 14
-    StokTbl.Range.Columns(2).ColumnWidth = 30
+    'Değişkenleri tanımlayın
+    Dim dataSheet As Worksheet
+    Dim dashboardSheet As Worksheet
+    Dim tbl As ListObject
+    Dim stockData As Range
+    Dim stockChart As ChartObject
+    Dim stockChartRange As Range
+    Dim stockType As Range
+    Dim stockTypeList As Range
+    Dim stockTypeCount As Long
+    Dim stockTypeArray() As Variant
+    Dim stockTypeIndex As Long
+    Dim stockQuantity As Range
+    Dim stockValue As Range
+    Dim i As Long
+    Dim j As Long
     
-    ' Stok grafiği oluşturma
-    Set StokChart = Sheets("Sheet1").Shapes.AddChart2(251, xlColumnClustered).Chart
-    StokChart.Parent.Name = "Stok Grafik"
-    StokChart.SetSourceData StokTbl.Range.Columns(3)
-    StokChart.HasLegend = False
-    StokChartTitle = "Stok Durumu"
-    StokChart.ChartTitle.Text = StokChartTitle
-    StokChart.Axes(xlCategory).TickLabels.Font.Size = 10
-    Set StokChartRange = StokTbl.Range.Columns(1).Resize(StokTbl.ListRows.Count + 1, 1)
-    StokChart.Axes(xlCategory).CategoryNames = StokChartRange
-    StokChart.Axes(xlValue).TickLabels.NumberFormat = "#,##0.00"
-    StokChart.ChartArea.Format.Fill.ForeColor.RGB = RGB(255, 255, 255)
-    StokChart.ChartArea.Format.Line.Visible = False
-    StokChart.PlotArea.Format.Fill.ForeColor.RGB = RGB(255, 255, 255)
-    StokChart.PlotArea.Format.Line.Visible = False
-    StokChart.ChartArea.Border.LineStyle = xlNone
-    StokChart.PlotArea.Border.LineStyle = xlNone
+    'Worksheet'leri tanımlayın
+    Set dataSheet = ThisWorkbook.Worksheets("Data")
+    Set dashboardSheet = ThisWorkbook.Worksheets("Dashboard")
     
-    ' Stok takip tablosu oluşturma
-    Dim StokTakipTbl As ListObject
-    Dim StokTakipData As Range
-    Dim StokTakipChart As Chart
-    Dim StokTakipChartRange As Range
-    Dim StokTakipChartTitle As String
+    'Tablo tanımlayın
+    Set tbl = dataSheet.ListObjects("StockTable")
+    Set stockData = tbl.DataBodyRange
     
-    Set StokTakipData = Sheets("Sheet1").Range("E1:H101")
-    Set StokTakipTbl = Sheets("Sheet1").ListObjects.Add(xlSrcRange, StokTakipData, , xlYes)
-    StokTakipTbl.TableStyle = "TableStyleMedium2"
-    StokTakipTbl.Range.Columns(1).ColumnWidth = 14
-    StokTakipTbl.Range.Columns(2).ColumnWidth = 30
-    StokTakipTbl.Range.Columns(3).ColumnWidth = 14
-    StokTakipTbl.Range.Columns(4).ColumnWidth = 14
+    'Stok grafiklerini hazırlayın
+    Set stockChart = dashboardSheet.ChartObjects("StockChart")
+    Set stockChartRange = dataSheet.Range("A1").Resize(tbl.Range.Rows.Count + 1, tbl.Range.Columns.Count)
     
-    ' Stok takip grafiği oluşturma
-    Set StokTakipChart = Sheets("Sheet1").Shapes.AddChart2(251, xlLineMarkers).Chart
-    StokTakipChart.Parent.Name = "Stok Takip Grafik"
-    StokTakipChart.SetSourceData StokTak
+    'Grafik veri serilerini ayarlayın
+    With stockChart.Chart
+        .SetSourceData Source:=stockChartRange
+        .SeriesCollection(1).XValues = dataSheet.Range("A2:A" & tbl.Range.Rows.Count + 1)
+        For i = 2 To tbl.Range.Columns.Count
+            .SeriesCollection.NewSeries
+            .SeriesCollection(i).Name = tbl.HeaderRowRange(i)
+            .SeriesCollection(i).Values = dataSheet.Range(tbl.HeaderRowRange(i).Offset(1, 0), tbl.HeaderRowRange(i).Offset(tbl.Range.Rows.Count, 0))
+            .SeriesCollection(i).XValues = dataSheet.Range("A2:A" & tbl.Range.Rows.Count + 1)
+        Next i
+    End With
+    
+    'Stok tipi verilerini hazırlayın
+    Set stockType = tbl.ListColumns("Type").DataBodyRange
+    Set stockTypeList = dashboardSheet.Range("B4:B10")
+    stockTypeList.ClearContents
+    
+    'Stok tipi listesini oluşturun
+    stockTypeCount = 0
+    For i = 1 To stockType.Rows.Count
+        stockTypeIndex = -1
+        For j = 1 To stockTypeCount
+            If stockTypeArray(j) = stockType(i, 1) Then
+                stockTypeIndex = j
+                Exit For
+            End If
+        Next j
+        If stockTypeIndex = -1 Then
+            stockTypeCount = stockTypeCount + 1
+            stockTypeIndex = stockTypeCount
+            stockTypeArray(stockTypeIndex) = stockType(i, 1)
+        End If
+    Next i
+    
+    Sub stockDashboard()
+    
+    'Değişkenleri tanımlayın
+    Dim dataSheet As Worksheet
+    Dim dashboardSheet As Worksheet
+    Dim tbl As ListObject
+    Dim stockData As Range
+    Dim stockChart As ChartObject
+    Dim stockChartRange As Range
+    Dim stockType As Range
+    Dim stockTypeList As Range
+    Dim stockTypeCount As Long
+    Dim stockTypeArray() As Variant
+    Dim stockTypeIndex As Long
+    Dim stockQuantity As Range
+    Dim stockValue As Range
+    Dim i As Long
+    Dim j As Long
+    
+    'Worksheet'leri tanımlayın
+    Set dataSheet = ThisWorkbook.Worksheets("Data")
+    Set dashboardSheet = ThisWorkbook.Worksheets("Dashboard")
+    
+    'Tablo tanımlayın
+    Set tbl = dataSheet.ListObjects("StockTable")
+    Set stockData = tbl.DataBodyRange
+    
+    'Stok grafiklerini hazırlayın
+    Set stockChart = dashboardSheet.ChartObjects("StockChart")
+    Set stockChartRange = dataSheet.Range("A1").Resize(tbl.Range.Rows.Count + 1, tbl.Range.Columns.Count)
+    
+    'Grafik veri serilerini ayarlayın
+    With stockChart.Chart
+        .SetSourceData Source:=stockChartRange
+        .SeriesCollection(1).XValues = dataSheet.Range("A2:A" & tbl.Range.Rows.Count + 1)
+        For i = 2 To tbl.Range.Columns.Count
+            .SeriesCollection.NewSeries
+            .SeriesCollection(i).Name = tbl.HeaderRowRange(i)
+            .SeriesCollection(i).Values = dataSheet.Range(tbl.HeaderRowRange(i).Offset(1, 0), tbl.HeaderRowRange(i).Offset(tbl.Range.Rows.Count, 0))
+            .SeriesCollection(i).XValues = dataSheet.Range("A2:A" & tbl.Range.Rows.Count + 1)
+        Next i
+    End With
+    
+    'Stok tipi verilerini hazırlayın
+    Set stockType = tbl.ListColumns("Type").DataBodyRange
+    Set stockTypeList = dashboardSheet.Range("B4:B10")
+    stockTypeList.ClearContents
+    
+    'Stok tipi listesini oluşturun
+    stockTypeCount = 0
+    For i = 1 To stockType.Rows.Count
+        stockTypeIndex = -1
+        For j = 1 To stockTypeCount
+            If stockTypeArray(j) = stockType(i, 1) Then
+                stockTypeIndex = j
+                Exit For
+            End If
+        Next j
+        If stockTypeIndex = -1 Then
+            stockTypeCount = stockTypeCount + 1
+            stockTypeIndex = stockTypeCount
+            stockTypeArray(stockTypeIndex) = stockType(i, 1)
+        End If
+    Next i
+    
+    'Stok Tipi Listesini Yazdırın
+Sheets("StokListesi").Activate
+Range("I1").Value = "Stok Tipi Listesi"
+Range("I2").Value = "Tüm Stoklar"
+
+'Her Stok Tipi İçin Verileri Toplayın
+Dim i As Long
+For i = 3 To StokListesi.Range("A" & Rows.Count).End(xlUp).Row
+    'Stok Tipi Adını ve Toplam Stok Sayısını Alın
+    Dim stok_tipi As String
+    stok_tipi = StokListesi.Range("A" & i).Value
+    Dim toplam_stok As Long
+    toplam_stok = WorksheetFunction.SumIf(Stoklar.Range("B:B"), stok_tipi, Stoklar.Range("F:F"))
+    
+    'Stok Tipi Listesine Ekle
+    Dim next_row As Long
+    next_row = Range("I" & Rows.Count).End(xlUp).Row + 1
+    Range("I" & next_row).Value = stok_tipi
+    Range("J" & next_row).Value = toplam_stok
+Next i
+
+'Grafikleri Çizdirin
+Dim StokTipiChart As ChartObject
+Set StokTipiChart = Sheets("StokListesi").ChartObjects.Add(Left:=Range("M1").Left, _
+    Width:=Range("M1:M2").Width, Top:=Range("M1").Top, Height:=Range("M1:M2").Height)
+    
+With StokTipiChart.Chart
+    .SetSourceData Source:=Range("I1:J" & Range("I" & Rows.Count).End(xlUp).Row)
+    .ChartType = xlColumnClustered
+    .HasTitle = True
+    .ChartTitle.Text = "Stok Tipine Göre Toplam Stok Sayısı"
+    .Axes(xlCategory).TickLabelSpacing = 1
+    .Axes(xlCategory).TickLabels.Font.Size = 8
+    .Axes(xlValue).TickLabels.NumberFormat = "#,##0"
+End With
